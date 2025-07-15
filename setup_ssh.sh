@@ -99,13 +99,22 @@ echo "📦 Backing up /etc/ssh/sshd_config"
 sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
 
 echo "🔐 Securing sshd_config"
-sudo sed -i 's/^#\?PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
-sudo sed -i 's/^#\?PubkeyAuthentication no/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
-sudo sed -i 's/^#\?UsePAM no/UsePAM yes/g' /etc/ssh/sshd_config
-sudo sed -i 's/^#\?PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
-if ! grep -q "^PermitRootLogin" /etc/ssh/sshd_config; then
-    echo "PermitRootLogin prohibit-password" | sudo tee -a /etc/ssh/sshd_config > /dev/null
-fi
+
+# Disable password authentication (replace any existing line)
+sudo sed -i '/^#\?PasswordAuthentication/d' /etc/ssh/sshd_config
+echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config > /dev/null
+
+# Enable PubkeyAuthentication (replace any existing line)
+sudo sed -i '/^#\?PubkeyAuthentication/d' /etc/ssh/sshd_config
+echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config > /dev/null
+
+# Ensure UsePAM is yes (replace any existing line)
+sudo sed -i '/^#\?UsePAM/d' /etc/ssh/sshd_config
+echo "UsePAM yes" | sudo tee -a /etc/ssh/sshd_config > /dev/null
+
+# Set PermitRootLogin to prohibit-password (replace any existing line)
+sudo sed -i '/^#\?PermitRootLogin/d' /etc/ssh/sshd_config
+echo "PermitRootLogin prohibit-password" | sudo tee -a /etc/ssh/sshd_config > /dev/null
 
 # 8. Restart SSH service
 echo "🔁 Restarting SSH service: $SSH_SERVICE"
